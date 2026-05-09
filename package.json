@@ -1,0 +1,10 @@
+{
+  "name": "secure-service-dev-solution",
+  "version": "1.0.0",
+  "description": "Template repository for the secure-service-dev challenge.",
+  "scripts": {
+    "test": "node tests/public_test.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
