@@ -16,7 +16,7 @@
 #
 # If you want, you can directly call the service URL in this script.
 # Replace the line below with your actual implementation command/s:
-export RESPONSE=$(curl -s -X GET "$API_URL")
+export RESPONSE=$(curl -i -s -X GET "$API_URL")
 
 # Please output the raw HTTP response from the target server
 echo "RESPONSE: $RESPONSE"
