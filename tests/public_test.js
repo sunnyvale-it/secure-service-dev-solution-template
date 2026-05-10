@@ -47,8 +47,8 @@ child.on('close', (code) => {
   }
 
   // Validation: Check for 200 OK and Signature header
-  if (!outputBuffer.includes('200') || !outputBuffer.includes('signature:')) {
-    console.error('❌ FAILURE: Could not find "200 OK" or "Signature:" in the response dump.');
+  if (!outputBuffer.includes('200') || !outputBuffer.toLowerCase().includes('signature:')) {
+    console.error('❌ FAILURE: Could not find "200" or "signature:" in the response dump.');
     console.error('Make sure your script prints the raw HTTP response from the server to standard output.');
     process.exit(1);
   }
