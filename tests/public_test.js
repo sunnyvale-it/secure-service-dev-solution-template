@@ -3,7 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
 
-const apiUrl = process.env.API_URL || 'https://api.sunnyvale.it/secure-service'; // Default example API
+const apiUrl = process.env.API_URL || 'https://secure-service-1-0.onrender.com'; // Default example API
 
 console.log('--- Starting Public Test ---');
 console.log(`Target API: ${apiUrl}`);
@@ -73,9 +73,38 @@ child.on('close', (code) => {
   const serverSignatureHeader = signatureMatch[1].trim();
   console.log(`Server Signature Header: ${serverSignatureHeader}`);
 
+  // Extract Payload from run.sh
+  const runShPath = path.resolve(workspacePath, 'run.sh');
+  let payloadStr = '';
+  let payloadObj = null;
+
+  if (fs.existsSync(runShPath)) {
+    const runShContent = fs.readFileSync(runShPath, 'utf8');
+    const match = runShContent.match(/PAYLOAD="(\{.*\})"/);
+    if (match) {
+      payloadStr = match[1].replace(/\\"/g, '"');
+      try {
+        payloadObj = JSON.parse(payloadStr);
+      } catch (e) {
+        console.error('❌ FAILURE: Could not parse JSON from PAYLOAD in run.sh');
+        process.exit(1);
+      }
+    }
+  }
+
+  if (!payloadObj) {
+    console.error('❌ FAILURE: Could not extract PAYLOAD from run.sh. Make sure you define it like PAYLOAD="{\\"code\\": ...}"');
+    process.exit(1);
+  }
+
+  const author = payloadObj.author;
+  if (!author || !/^[^\s@]+@sunnyvale\.it$/.test(author)) {
+    console.error('❌ FAILURE: The author must be a valid email address using @sunnyvale.it for the domain part.');
+    process.exit(1);
+  }
+
   // Construct expected payload and verify digest
-  const payload = '{"code": "12345", "author": "Denis Maggiorotto"}';
-  const expectedDigest = crypto.createHash('sha256').update(payload).digest('base64');
+  const expectedDigest = crypto.createHash('sha256').update(payloadStr).digest('base64');
   const expectedDigestStr = `SHA-256=${expectedDigest}`;
 
   if (serverDigest !== expectedDigestStr) {
